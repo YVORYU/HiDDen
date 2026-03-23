@@ -6,6 +6,8 @@
 
 数据集下载 http://cocodataset.org/#download
 
+由于代码比较老，一些库的用法已废弃，该项目对其进行了修改
+
 数据集目录
 
 ```
@@ -22,6 +24,26 @@
       ...
 ```
 
-本项目训练共使用10000张图片，其中训练集7000，验证集3000
+本项目训练共使用10000张图片，其中训练集7000，验证集3000。
 
-由于代码比较老，一些库的用法已废弃，该项目对其进行了修改
+## 训练:
+
+**new**
+
+```
+python main.py new --name <experiment_name> --data-dir <dataset> --batch-size <b>
+```
+
+**continue**
+
+```
+python main.py continue  --folder <run_folder>
+```
+
+## 测试
+
+```
+python test_model.py -o <options-and-config.pickle> -c <checkpoint> -s <source_image> -m <message>
+```
+
+
