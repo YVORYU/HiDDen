@@ -154,3 +154,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    
+    """
+    test_model.py -o "runs\train 2026.03.21--11-33-51\options-and-config.pickle" -c "runs\train 2026.03.21--11-33-51\checkpoints\train--epoch-300.pyt" -s "dataset1\val\val_class\000000553000.jpg" -m 110111
+    """

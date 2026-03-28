@@ -26,8 +26,12 @@ class EncoderDecoder(nn.Module):
         self.decoder = Decoder(config)
 
     def forward(self, image, message):
+        # 编码
         encoded_image = self.encoder(image, message)
+        #对刚生成的带水印图像施加噪声
         noised_and_cover = self.noiser([encoded_image, image])
+        #取出被噪声污染后的图片 ，送给解码器
         noised_image = noised_and_cover[0]
+        # 解码
         decoded_message = self.decoder(noised_image)
         return encoded_image, noised_image, decoded_message

@@ -1,7 +1,9 @@
 import math
 import numpy as np
 
-
+"""
+实现DCT滤波器生成器
+"""
 def delta(a: int, b: int) -> int:
     if a == b:
         return 1

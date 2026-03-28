@@ -14,7 +14,7 @@ from noise_argparser import NoiseArgParser
 
 from train import train
 
-
+#定义参数解析器
 def main():
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -59,10 +59,13 @@ def main():
     checkpoint = None
     loaded_checkpoint_file_name = None
 
+#解析continue
     if args.command == 'continue':
         this_run_folder = args.folder
+        #加载网络模型配置，最新一次训练参数，噪声层配置
         options_file = os.path.join(this_run_folder, 'options-and-config.pickle')
         train_options, hidden_config, noise_config = utils.load_options(options_file)
+        #加载最新一次训练的模型
         checkpoint, loaded_checkpoint_file_name = utils.load_last_checkpoint(os.path.join(this_run_folder, 'checkpoints'))
         train_options.start_epoch = checkpoint['epoch'] + 1
         if args.data_dir is not None:
@@ -75,10 +78,11 @@ def main():
                 print(f'Command-line specifies of number of epochs = {args.epochs}, but folder={args.folder} '
                       f'already contains checkpoint for epoch = {train_options.start_epoch}.')
                 exit(1)
-
+#解析new
     else:
         assert args.command == 'new'
         start_epoch = 1
+        #创建配置文件，存储训练参数，噪声层配置，网络模型配置
         train_options = TrainingOptions(
             batch_size=args.batch_size,
             number_of_epochs=args.epochs,
@@ -88,6 +92,7 @@ def main():
             start_epoch=start_epoch,
             experiment_name=args.name)
 
+        #解析噪声层配置，将噪声层配置转换为列表
         noise_config = args.noise if args.noise is not None else []
         hidden_config = HiDDenConfiguration(H=args.size, W=args.size,
                                             message_length=args.message,
@@ -108,7 +113,7 @@ def main():
             pickle.dump(noise_config, f)
             pickle.dump(hidden_config, f)
 
-
+#配置日志记录
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s',
                         handlers=[
@@ -123,7 +128,9 @@ def main():
     else:
         tb_logger = None
 
+    #创建噪声层模块
     noiser = Noiser(noise_config, device)
+    #创建网络模型
     model = Hidden(hidden_config, device, noiser, tb_logger)
 
     if args.command == 'continue':

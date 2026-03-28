@@ -1,7 +1,9 @@
 import torch
 import torch.nn as nn
 import numpy as np
-
+"""
+实现"dropout"功能，随机将噪声图像的像素替换为0，用覆盖图像的像素替换
+"""
 class Dropout(nn.Module):
     """
     Drops random pixels from the noised image and substitues them with the pixels from the cover image

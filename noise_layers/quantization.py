@@ -2,7 +2,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-
+"""
+实现量化噪声层，将噪声图像的像素值量化到[0, 255]范围内
+"""
 def transform(tensor, target_range):
     source_min = tensor.min()
     source_max = tensor.max()

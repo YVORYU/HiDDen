@@ -1,3 +1,6 @@
+"""
+    训练参数，及网路参数
+"""
 class TrainingOptions:
     """
     Configuration options for the training

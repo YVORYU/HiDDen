@@ -1,6 +1,8 @@
 import torch.nn as nn
 
-
+"""
+实现"映射"噪声层，不改变图像
+"""
 class Identity(nn.Module):
     """
     Identity-mapping noise layer. Does not change the image

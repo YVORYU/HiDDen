@@ -1,6 +1,8 @@
 import torch.nn as nn
 import numpy as np
-
+"""
+实现随机裁剪功能，按照指定的高度和宽度比例范围随机裁剪图像
+"""
 
 def random_float(min, max):
     """

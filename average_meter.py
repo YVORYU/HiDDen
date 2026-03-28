@@ -1,7 +1,10 @@
 import numpy as np
 
 class AverageMeter(object):
-    """Computes and stores the average and current value"""
+    """
+    Computes and stores the average and current value
+    用于 计算和存储损失（或其他指标）的平均值 的工具类
+    """
     def __init__(self):
         self.reset()
 

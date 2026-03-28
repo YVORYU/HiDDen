@@ -18,12 +18,15 @@ class Hidden:
         :param tb_logger: Optional TensorboardX logger object, if specified -- enables Tensorboard logging
         """
         super(Hidden, self).__init__()
-
+        #定义水印编码器-解码器整体
         self.encoder_decoder = EncoderDecoder(configuration, noiser).to(device)
+        #定义判积器
         self.discriminator = Discriminator(configuration).to(device)
+        #创建优化器，用于训练编码器-解码器和判积器
         self.optimizer_enc_dec = torch.optim.Adam(self.encoder_decoder.parameters())
+        #创建优化器，用于训练判积器
         self.optimizer_discrim = torch.optim.Adam(self.discriminator.parameters())
-
+        #定义VGG损失，目的是约束网络在「特征层面」也接近原图，生成更自然的图像，优化目标是"感知质量"，细节保留更好
         if configuration.use_vgg:
             self.vgg_loss = VGGLoss(3, 1, False)
             self.vgg_loss.to(device)
@@ -32,14 +35,16 @@ class Hidden:
 
         self.config = configuration
         self.device = device
-
+        #定义损失函数
+        #BCEWithLogitsLoss：二分类交叉熵损失函数，用于计算二分类任务的损失
+        #MSELoss：均方误差损失函数，用于计算回归任务的损失
         self.bce_with_logits_loss = nn.BCEWithLogitsLoss().to(device)
         self.mse_loss = nn.MSELoss().to(device)
 
         # Defined the labels used for training the discriminator/adversarial loss
         self.cover_label = 1
         self.encoded_label = 0
-
+        #定义日志记录器，用于记录训练过程中的梯度信息
         self.tb_logger = tb_logger
         if tb_logger is not None:
             from tensorboard_logger import TensorBoardLogger
@@ -60,7 +65,9 @@ class Hidden:
         images, messages = batch
 
         batch_size = images.shape[0]
+        #设置网络为训练模式
         self.encoder_decoder.train()
+        #设置判别器为训练模式
         self.discriminator.train()
         with torch.enable_grad():
             # ---------------- Train the discriminator -----------------------------
@@ -143,22 +150,26 @@ class Hidden:
         images, messages = batch
 
         batch_size = images.shape[0]
-
+        #设置模型为评估模式，停止梯度追踪
         self.encoder_decoder.eval()
         self.discriminator.eval()
         with torch.no_grad():
+            #设置判别器的目标标签
+            #cover_label: 真实图像标签
+            #encoded_label: 加密图像标签
+            #g_target_label_encoded: 生成器输出的加密图像标签
             d_target_label_cover = torch.full((batch_size, 1), self.cover_label, device=self.device)
             d_target_label_encoded = torch.full((batch_size, 1), self.encoded_label, device=self.device)
             g_target_label_encoded = torch.full((batch_size, 1), self.cover_label, device=self.device)
 
             d_on_cover = self.discriminator(images)
             d_loss_on_cover = self.bce_with_logits_loss(d_on_cover, d_target_label_cover.float())
-
+            #将图像编码为加密图像
             encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages)
-
+            #判别器判别加密图像是否为真实图像，得到判别器损失
             d_on_encoded = self.discriminator(encoded_images)
             d_loss_on_encoded = self.bce_with_logits_loss(d_on_encoded, d_target_label_encoded.float())
-
+            #判别器判别加密图像，生成器损失
             d_on_encoded_for_enc = self.discriminator(encoded_images)
             g_loss_adv = self.bce_with_logits_loss(d_on_encoded_for_enc, g_target_label_encoded.float())
 
@@ -168,8 +179,9 @@ class Hidden:
                 vgg_on_cov = self.vgg_loss(images)
                 vgg_on_enc = self.vgg_loss(encoded_images)
                 g_loss_enc = self.mse_loss(vgg_on_cov, vgg_on_enc)
-
+            #解码器损失，用于让解码器输出与真实消息的MSE最小化
             g_loss_dec = self.mse_loss(decoded_messages, messages)
+            #生成器总损失，用于让生成器输出的加密图像被判别器识别为真实图像
             g_loss = self.config.adversarial_loss * g_loss_adv + self.config.encoder_loss * g_loss_enc \
                      + self.config.decoder_loss * g_loss_dec
 

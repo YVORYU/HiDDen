@@ -80,12 +80,13 @@ class NoiseArgParser(argparse.Action):
 
     def __call__(self, parser, namespace, values,
                  option_string=None):
-
+        #建立一个列表用于存储用户输入的噪声层配置
         layers = []
+        #将用户输入的噪声层配置字符串按+号分隔
         split_commands = values[0].split('+')
 
         for command in split_commands:
-            # remove all whitespace
+            # 去掉空格
             command = command.replace(' ', '')
             if command[:len('cropout')] == 'cropout':
                 layers.append(parse_cropout(command))

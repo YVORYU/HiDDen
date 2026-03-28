@@ -1,7 +1,9 @@
 import torch
 import torch.nn as nn
 from noise_layers.crop import get_random_rectangle_inside
-
+"""
+实现"裁剪填充"功能，随机选择一个矩形区域用原始覆盖图像的像素替换噪声图像的对应区域
+"""
 
 class Cropout(nn.Module):
     """

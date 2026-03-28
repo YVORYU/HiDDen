@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from options import HiDDenConfiguration, TrainingOptions
 from model.hidden import Hidden
 
-
+# 图片转张量
 def image_to_tensor(image):
     """
     Transforms a numpy-image into torch tensor
@@ -28,7 +28,7 @@ def image_to_tensor(image):
     image_tensor = image_tensor / 127.5 - 1
     return image_tensor
 
-
+# 张量转图片
 def tensor_to_image(tensor):
     """
     Transforms a torch tensor into numpy uint8 array (image)
@@ -39,21 +39,32 @@ def tensor_to_image(tensor):
     image = (image + 1) * 127.5
     return np.clip(image, 0, 255).astype(np.uint8)
 
-
+"""
+保存验证的图片
+# original_images: 原始图片张量，形状为(batch_size, channels, height, width)
+# watermarked_images: 隐藏写入后的图片张量，形状为(batch_size, channels, height, width)
+# epoch: 当前训练轮次
+# folder: 保存图片的文件夹路径
+# resize_to: 指定将图片缩放为指定大小
+"""
 def save_images(original_images, watermarked_images, epoch, folder, resize_to=None):
+    # 提取第一个batch的图片
     images = original_images[:original_images.shape[0], :, :, :].cpu()
     watermarked_images = watermarked_images[:watermarked_images.shape[0], :, :, :].cpu()
 
     # scale values to range [0, 1] from original range of [-1, 1]
+    # 将值从原始范围[-1,1]缩放到[0,1]范围，值域归一化
     images = (images + 1) / 2
     watermarked_images = (watermarked_images + 1) / 2
 
+    #如果传入的参数不为None，将图片缩放为指定大小
     if resize_to is not None:
         images = F.interpolate(images, size=resize_to)
         watermarked_images = F.interpolate(watermarked_images, size=resize_to)
-
+    #拼接原始图片和隐藏写入后的图片，维度为0，即按行拼接
     stacked_images = torch.cat([images, watermarked_images], dim=0)
     filename = os.path.join(folder, 'epoch-{}.png'.format(epoch))
+    # 保存拼接后的图片
     torchvision.utils.save_image(stacked_images, filename, nrow=original_images.shape[0], normalize=False)
 
 
@@ -69,7 +80,13 @@ def last_checkpoint_from_folder(folder: str):
     last_file = os.path.join(folder, last_file)
     return last_file
 
-
+"""
+保存模型检查点
+# model: 要保存的模型对象
+# experiment_name: 实验名称
+# epoch: 当前训练轮次
+# checkpoint_folder: 保存检查点的文件夹路径
+"""
 def save_checkpoint(model: Hidden, experiment_name: str, epoch: int, checkpoint_folder: str):
     """ Saves a checkpoint at the end of an epoch. """
     if not os.path.exists(checkpoint_folder):
@@ -89,7 +106,11 @@ def save_checkpoint(model: Hidden, experiment_name: str, epoch: int, checkpoint_
     logging.info('Saving checkpoint done.')
 
 
-# def load_checkpoint(hidden_net: Hidden, options: Options, this_run_folder: str):
+"""
+加载最新的模型检查点
+# checkpoint_folder: 检查点文件夹路径
+# return: 最新的检查点对象和检查点文件路径
+"""
 def load_last_checkpoint(checkpoint_folder):
     """ Load the last checkpoint from the given folder """
     last_checkpoint_file = last_checkpoint_from_folder(checkpoint_folder)

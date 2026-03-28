@@ -2,7 +2,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+"""
+实现JPEG压缩噪声层
+"""
 def gen_filters(size_x: int, size_y: int, dct_or_idct_fun: callable) -> np.ndarray:
     tile_size_x = 8
     filters = np.zeros((size_x * size_y, size_x, size_y))

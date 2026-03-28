@@ -2,7 +2,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 from noise_layers.crop import random_float
-
+"""
+实现"缩放"功能，随机缩放噪声图像的大小
+"""
 class Resize(nn.Module):
     """
     Resize the image. The target size is original size * resize_ratio
